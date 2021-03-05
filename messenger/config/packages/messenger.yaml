@@ -1,0 +1,70 @@
+framework:
+    messenger:
+        default_bus: command.bus
+        buses:
+            command.bus:
+                middleware:
+                    - App\Messenger\AuditMiddleware
+#                    - doctrine_transaction
+            event.bus:
+                default_middleware: allow_no_handlers
+                middleware:
+                    - App\Messenger\AuditMiddleware
+
+            query.bus:
+                middleware:
+                    - App\Messenger\AuditMiddleware
+
+        # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
+        failure_transport: failed
+
+        transports:
+            # https://symfony.com/doc/current/messenger.html#transport-configuration
+            async_doctrine:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+
+
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                serializer: messenger.transport.symfony_serializer
+                retry_strategy:
+                    delay: 500
+                options:
+                    exchange:
+                        name: messages
+                        type: direct
+                        default_publish_routing_key: normal
+                    queues:
+                        messages_normal:
+                            binding_keys: [normal]
+
+
+            async_priority_high:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+#                options:
+#                    queue_name: high
+                options:
+                    exchange:
+                        name: messages
+                        type: direct
+                        default_publish_routing_key: high
+                    queues:
+                        messages_high:
+                            binding_keys: [high]
+
+            external_messages:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                serializer: App\Messenger\ExternalJsonMessengerSerializer
+                options:
+                    auto_setup: false
+                    queues:
+                        messages_from_external: ~
+
+            failed: 'doctrine://default?queue_name=failed'
+            # sync: 'sync://'
+
+        routing:
+            # Route your messages to the transports
+           App\Message\Command\AddToUser: async_priority_high
+           App\Message\Command\DeleteUserTraitement: async_doctrine
+           App\Message\Event\UserUpdatedEvent: async_doctrine

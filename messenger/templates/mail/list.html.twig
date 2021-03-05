@@ -1,0 +1,51 @@
+{% extends 'content_base.html.twig' %}
+
+{% block content_body %}
+    <a href="" class="btn btn-primary pull-right">
+        create <span class="fa fa-plus-circle"></span>
+    </a>
+    <h1>ALL USRES  ({{ userCount }})</h1>
+
+    <table class="table table-user">
+        <thead>
+        <tr>
+            <th>name</th>
+            <th>statut</th>
+            <th>compter</th>
+            <th></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody id="table-user-body-id">
+        {% for user in users %}
+            <tr id="user-{{ user.id }}">
+                <td>{{ user.name }}</td>
+                <td>  <span class="updatedClass badge {% if user.updateUser %} badge-success {% else %} badge-secondary{% endif %}" >{{ user.status }}</span></td>
+                <td><span class="js-count">
+                       {{ user.compter }}
+                    </span></td>
+                <td>
+                    <a href="{{ path('user_add', {'id': user.id}) }}" class="js-user"><span class="fa fa-plus"></span></a>
+                    <a href="{{ path('user_minus',{'id': user.id}) }}" class="js-user"><span class="fa fa-minus"></span></a>
+                </td>
+
+                <td>
+                    <a href="{{ path('user_delete',{'id': user.id}) }}" class="js-user-delete"><span class="fa fa-close"></span></a>
+                    <a href="{{ path('user_update',{'id': user.id}) }}" class="js-user-update"><span class="fa fa-pencil"></span></a>
+
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/article_show.js') }}"></script>
+{% endblock %}
+
